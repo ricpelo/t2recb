@@ -10,9 +10,9 @@ use Yii;
  * @property int $id
  * @property string $nombre
  * @property string $password
- * @property string $auth_key
- * @property string $telefono
- * @property string $poblacion
+ *
+ * @property Carritos[] $carritos
+ * @property Facturas[] $facturas
  */
 class Usuarios extends \yii\db\ActiveRecord
 {
@@ -31,7 +31,8 @@ class Usuarios extends \yii\db\ActiveRecord
     {
         return [
             [['nombre', 'password'], 'required'],
-            [['nombre', 'auth_key', 'telefono', 'poblacion'], 'string', 'max' => 255],
+            [['nombre'], 'string', 'max' => 255],
+            [['nombre'], 'unique'],
             [['password'], 'string', 'max' => 60],
         ];
     }
@@ -45,9 +46,46 @@ class Usuarios extends \yii\db\ActiveRecord
             'id' => 'ID',
             'nombre' => 'Nombre',
             'password' => 'Password',
-            'auth_key' => 'Auth Key',
-            'telefono' => 'Teléfono',
-            'poblacion' => 'Población',
         ];
+    }
+
+    /**
+     * Gets query for [[Carritos]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCarritos()
+    {
+        return $this->hasMany(Carritos::class, ['usuario_id' => 'id'])
+            ->inverseOf('usuario');
+    }
+
+    /**
+     * Gets query for [[Facturas]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFacturas()
+    {
+        return $this->hasMany(Facturas::class, ['usuario_id' => 'id'])
+            ->inverseOf('usuario');
+    }
+
+    public function getLineas()
+    {
+        return $this->hasMany(Lineas::class, ['factura_id' => 'id'])
+            ->via('facturas');
+    }
+
+    public function getZapatosComprados()
+    {
+        return $this->hasMany(Zapatos::class, ['id' => 'zapato_id'])
+            ->via('lineas');
+    }
+
+    public function getZapatosEnCarrito()
+    {
+        return $this->hasMany(Zapatos::class, ['id' => 'zapato_id'])
+            ->via('carritos');
     }
 }

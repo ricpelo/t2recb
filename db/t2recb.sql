@@ -10,6 +10,9 @@ CREATE TABLE usuarios (
   , password varchar(60)  NOT NULL
 );
 
+INSERT INTO usuarios (nombre, password)
+VALUES ('pepe', crypt('pepe', gen_salt('bf')));
+
 DROP TABLE IF EXISTS zapatos CASCADE;
 
 CREATE TABLE zapatos (
@@ -17,7 +20,13 @@ CREATE TABLE zapatos (
   , codigo       numeric(13)  NOT NULL UNIQUE
   , denominacion varchar(255) NOT NULL
   , precio       numeric(7,2)
+  , CONSTRAINT ck_codigo_13_digitos CHECK (length(codigo::text) = 13)
 );
+
+
+INSERT INTO zapatos (codigo, denominacion, precio)
+VALUES (1231231231231, 'Converse 24', 35.00)
+     , (9999999999999, 'Nike 75', 49.99);
 
 DROP TABLE IF EXISTS carritos CASCADE;
 
@@ -29,6 +38,10 @@ CREATE TABLE carritos (
   , CONSTRAINT ck_cantidad_no_negativa CHECK (cantidad >= 0)
 );
 
+INSERT INTO carritos (usuario_id, zapato_id, cantidad)
+VALUES (1, 1, 4)
+     , (1, 2, 2);
+
 DROP TABLE IF EXISTS facturas CASCADE;
 
 CREATE TABLE facturas (
@@ -38,6 +51,9 @@ CREATE TABLE facturas (
 );
 
 CREATE INDEX idx_facturas_usuario_id ON facturas (usuario_id);
+
+INSERT INTO facturas (usuario_id)
+VALUES (1);
 
 DROP TABLE IF EXISTS lineas CASCADE;
 
@@ -50,3 +66,7 @@ CREATE TABLE lineas (
 );
 
 CREATE INDEX idx_lineas_factura_id ON lineas (factura_id);
+
+INSERT INTO lineas (factura_id, zapato_id, cantidad)
+VALUES (1, 1, 2)
+     , (1, 2, 1);
