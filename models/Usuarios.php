@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\web\IdentityInterface;
 
 /**
  * This is the model class for table "usuarios".
@@ -14,7 +15,7 @@ use Yii;
  * @property Carritos[] $carritos
  * @property Facturas[] $facturas
  */
-class Usuarios extends \yii\db\ActiveRecord
+class Usuarios extends \yii\db\ActiveRecord implements IdentityInterface
 {
     /**
      * {@inheritdoc}
@@ -87,5 +88,51 @@ class Usuarios extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Zapatos::class, ['id' => 'zapato_id'])
             ->via('carritos');
+    }
+
+    public static function findByUsername($username)
+    {
+        return static::findOne(['nombre' => $username]);
+    }
+
+    public static function findIdentity($id)
+    {
+        return static::findOne($id);
+    }
+
+    public static function findIdentityByAccessToken($token, $type = null)
+    {
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function getAuthKey()
+    {
+    }
+
+    public function validateAuthKey($authKey)
+    {
+    }
+
+    public function validatePassword($password)
+    {
+        return Yii::$app->security->validatePassword(
+            $password,
+            $this->password
+        );
+    }
+
+    public static function cantidadEnCarrito()
+    {
+        if (Yii::$app->user->isGuest) {
+            return 'Sin carrito';
+        } else {
+            $cantidad = static::findOne(Yii::$app->user->id)
+                ->getCarritos()->sum('cantidad');
+            return "Ver carrito ($cantidad)";
+        }
     }
 }
