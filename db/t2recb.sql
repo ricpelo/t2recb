@@ -35,6 +35,7 @@ CREATE TABLE carritos (
   , usuario_id bigint    NOT NULL REFERENCES usuarios (id)
   , zapato_id  bigint    NOT NULL REFERENCES zapatos (id)
   , cantidad   int       NOT NULL
+  , UNIQUE (usuario_id, zapato_id),
   , CONSTRAINT ck_cantidad_no_negativa CHECK (cantidad >= 0)
 );
 

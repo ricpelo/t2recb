@@ -28,7 +28,7 @@ class CarritosController extends Controller {
 
     public function actionMeter($id)
     {
-
+        // ...
     }
 
     public function actionVaciar()
