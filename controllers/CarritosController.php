@@ -12,6 +12,7 @@ use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class CarritosController extends Controller {
     public function behaviors()
@@ -96,6 +97,20 @@ class CarritosController extends Controller {
         $carrito->cantidad++;
         $carrito->save();
         return $this->redirect(['carritos/ver']);
+    }
+
+    public function actionMasAjax()
+    {
+        $id = Yii::$app->request->post('id');
+        $carrito = $this->findModel($id);
+        $carrito->cantidad++;
+        $carrito->save();
+        $usuario_id = Yii::$app->user->id;
+        $total = Carritos::total($usuario_id);
+        return $this->asJson([
+            'cantidad' => $carrito->cantidad,
+            'total' => Yii::$app->formatter->asCurrency($total),
+        ]);
     }
 
     public function actionMenos($id)

@@ -4,9 +4,31 @@ use app\models\Carritos;
 use yii\bootstrap4\Html;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
+use yii\helpers\Url;
 
 $this->title = 'Carrito';
 $this->params['breadcrumbs'][] = $this->title;
+
+$url = Url::to(['carritos/mas-ajax']);
+$js = <<<EOT
+    $('.boton-mas').click(function (ev) {
+        var padre = $(this).closest('tr');
+        var id = padre.data('key');
+        ev.preventDefault();
+        $.ajax({
+            url: '$url',
+            type: 'post',
+            data: {
+                id: id
+            }
+        })
+        .done(function (data) {
+            $(padre).children('td').eq(3).text(data.cantidad);
+        });
+        return false;
+    });
+EOT;
+$this->registerJs($js);
 ?>
 
 <h2>Tu carrito:</h2>
@@ -39,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'carritos/mas',
                         'id' => $key,
                     ], [
-                        'class' => 'btn-sm btn-info',
+                        'class' => 'btn-sm btn-info boton-mas',
                         'data-method' => 'post',
                     ]);
                 },
@@ -48,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'carritos/menos',
                         'id' => $key,
                     ], [
-                        'class' => 'btn-sm btn-warning',
+                        'class' => 'btn-sm btn-warning boton-menos',
                         'data-method' => 'post',
                     ]);
                 },
