@@ -118,10 +118,6 @@ class ZapatosController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = Zapatos::findOne($id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
+        return Zapatos::findModel($id);
     }
 }

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\web\NotFoundHttpException;
 
 /**
  * This is the model class for table "zapatos".
@@ -78,4 +79,14 @@ class Zapatos extends \yii\db\ActiveRecord
         return $this->hasMany(Lineas::class, ['zapato_id' => 'id'])
             ->inverseOf('zapato');
     }
+
+    public static function findModel($id)
+    {
+        if (($model = static::findOne($id)) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
 }
