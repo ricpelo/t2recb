@@ -5,13 +5,27 @@ namespace app\controllers;
 use app\models\Carritos;
 use app\models\Zapatos;
 use Yii;
+use yii\data\ActiveDataProvider;
+use yii\db\Query;
+use yii\db\QueryBuilder;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 
 class CarritosController extends Controller {
     public function behaviors()
     {
         return [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'meter' => ['POST'],
+                    'vaciar' => ['POST'],
+                    'mas' => ['POST'],
+                    'menos' => ['POST'],
+                ],
+            ],
             'access' => [
                 '__class' => AccessControl::class,
                 'rules' => [
@@ -26,7 +40,22 @@ class CarritosController extends Controller {
 
     public function actionVer()
     {
+        $usuario_id = Yii::$app->user->id;
+        $total = Carritos::total($usuario_id);
+        $query = Carritos::find()
+            ->where([
+                'usuario_id' => $usuario_id,
+            ])
+            ->orderBy('id');
 
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        return $this->render('ver', [
+            'dataProvider' => $dataProvider,
+            'total' => $total,
+        ]);
     }
 
     public function actionMeter($id)
@@ -53,6 +82,42 @@ class CarritosController extends Controller {
 
     public function actionVaciar()
     {
+        (new Query())->createCommand()
+            ->delete('carritos', [
+                'usuario_id' => Yii::$app->user->id
+            ])->execute();
 
+        return $this->redirect(['carritos/ver']);
+    }
+
+    public function actionMas($id)
+    {
+        $carrito = $this->findModel($id);
+        $carrito->cantidad++;
+        $carrito->save();
+        return $this->redirect(['carritos/ver']);
+    }
+
+    public function actionMenos($id)
+    {
+        $carrito = $this->findModel($id);
+
+        if ($carrito->cantidad <= 1) {
+            $carrito->delete();
+        } else {
+            $carrito->cantidad--;
+            $carrito->save();
+        }
+
+        return $this->redirect(['carritos/ver']);
+    }
+
+    protected static function findModel($id)
+    {
+        if (($model = Carritos::findOne($id)) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

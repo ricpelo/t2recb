@@ -37,7 +37,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         return Html::a('Añadir al carrito', [
                             'carritos/meter',
                             'id' => $key,
-                        ], ['class' => 'btn-sm btn-info']);
+                        ], [
+                            'class' => 'btn-sm btn-info',
+                            'data-method' => 'post',
+                        ]);
                     },
                 ],
             ],

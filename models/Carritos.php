@@ -75,4 +75,11 @@ class Carritos extends \yii\db\ActiveRecord
         return $this->hasOne(Zapatos::class, ['id' => 'zapato_id'])
             ->inverseOf('carritos');
     }
+
+    public static function total($usuario_id) {
+        return static::find()
+            ->joinWith('zapato')
+            ->where(['usuario_id' => $usuario_id])
+            ->sum('cantidad * precio');
+    }
 }
