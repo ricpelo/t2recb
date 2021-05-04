@@ -131,8 +131,10 @@ class Usuarios extends \yii\db\ActiveRecord implements IdentityInterface
             return 'Sin carrito';
         } else {
             $cantidad = static::findOne(Yii::$app->user->id)
-                ->getCarritos()->sum('cantidad');
-            return "Ver carrito ($cantidad)";
+                ->getCarritos()->sum('cantidad') ?? 0;
+            return '<span id="ver-carrito">' .
+                   "Ver carrito ($cantidad)" .
+                   '</span>';
         }
     }
 }

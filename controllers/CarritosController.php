@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Carritos;
+use app\models\Usuarios;
 use app\models\Zapatos;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -121,11 +122,22 @@ class CarritosController extends Controller {
         $carrito->save();
         $usuario_id = Yii::$app->user->id;
         $total = Carritos::total($usuario_id);
-        $importe = $carrito->cantidad * $carrito->zapato->precio;
+        $query = Carritos::find()
+            ->where([
+                'usuario_id' => $usuario_id,
+            ])
+            ->orderBy('id');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
         return $this->asJson([
-            'cantidad' => $carrito->cantidad,
-            'importe' => Yii::$app->formatter->asCurrency($importe),
-            'total' => Yii::$app->formatter->asCurrency($total),
+            'carrito' => $this->renderAjax('_carrito', [
+                'dataProvider' => $dataProvider,
+                'total' => $total,
+            ]),
+            'cantidad' => Usuarios::cantidadEnCarrito(),
         ]);
     }
 
@@ -134,23 +146,31 @@ class CarritosController extends Controller {
         $id = Yii::$app->request->post('id');
         $carrito = $this->findModel($id);
         $usuario_id = Yii::$app->user->id;
-        $total = Carritos::total($usuario_id);
 
         if ($carrito->cantidad <= 1) {
             $carrito->delete();
-            $cantidad = 0;
-            $importe = 0;
         } else {
             $carrito->cantidad--;
             $carrito->save();
-            $cantidad = $carrito->cantidad;
-            $importe = $cantidad * $carrito->zapato->precio;
         }
 
+        $total = Carritos::total($usuario_id);
+        $query = Carritos::find()
+            ->where([
+                'usuario_id' => $usuario_id,
+            ])
+            ->orderBy('id');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
         return $this->asJson([
-            'cantidad' => $cantidad,
-            'importe' => Yii::$app->formatter->asCurrency($importe),
-            'total' => Yii::$app->formatter->asCurrency($total),
+            'carrito' => $this->renderAjax('_carrito', [
+                'dataProvider' => $dataProvider,
+                'total' => $total,
+            ]),
+            'cantidad' => Usuarios::cantidadEnCarrito(),
         ]);
     }
 
