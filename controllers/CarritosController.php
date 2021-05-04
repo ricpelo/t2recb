@@ -69,13 +69,13 @@ class CarritosController extends Controller {
 
     public function actionVaciar()
     {
-        $this->borrarCarritoUsuario();
+        static::borrarCarritoUsuario();
         return $this->redirect(['carritos/ver']);
     }
 
     public function actionVaciarAjax()
     {
-        $this->borrarCarritoUsuario();
+        static::borrarCarritoUsuario();
         return $this->devolverDatosVista();
     }
 
@@ -161,7 +161,7 @@ class CarritosController extends Controller {
         ]);
     }
 
-    private function borrarCarritoUsuario()
+    public static function borrarCarritoUsuario()
     {
         (new Query())->createCommand()
             ->delete('carritos', [

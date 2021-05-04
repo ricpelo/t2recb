@@ -82,8 +82,13 @@ $this->registerJs($js);
     ],
 ]) ?>
 
+<?= Html::a('Realizar pedido', ['facturas/crear'], [
+    'class' => 'btn btn-success',
+    'data-method' => 'post',
+]) ?>
+
 <?= Html::a('Vaciar carrito', ['carritos/vaciar'], [
     'class' => 'btn btn-danger',
     'id' => 'boton-vaciar',
     'data-method' => 'post',
-]);
+]) ?>
