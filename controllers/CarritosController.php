@@ -69,12 +69,14 @@ class CarritosController extends Controller {
 
     public function actionVaciar()
     {
-        (new Query())->createCommand()
-            ->delete('carritos', [
-                'usuario_id' => Yii::$app->user->id
-            ])->execute();
-
+        $this->borrarCarritoUsuario();
         return $this->redirect(['carritos/ver']);
+    }
+
+    public function actionVaciarAjax()
+    {
+        $this->borrarCarritoUsuario();
+        return $this->devolverDatosVista();
     }
 
     public function actionMas($id)
@@ -87,13 +89,7 @@ class CarritosController extends Controller {
     {
         $id = Yii::$app->request->post('id');
         $this->masZapato($id);
-
-        return $this->asJson([
-            'carrito' => $this->renderAjax('_carrito',
-                $this->datosVista()
-            ),
-            'cantidad' => Usuarios::cantidadEnCarrito(),
-        ]);
+        return $this->devolverDatosVista();
     }
 
     public function actionMenos($id)
@@ -106,13 +102,7 @@ class CarritosController extends Controller {
     {
         $id = Yii::$app->request->post('id');
         $this->menosZapato($id);
-
-        return $this->asJson([
-            'carrito' => $this->renderAjax('_carrito',
-                $this->datosVista()
-            ),
-            'cantidad' => Usuarios::cantidadEnCarrito(),
-        ]);
+        return $this->devolverDatosVista();
     }
 
     protected static function findModel($id)
@@ -159,5 +149,23 @@ class CarritosController extends Controller {
             $carrito->cantidad--;
             $carrito->save();
         }
+    }
+
+    private function devolverDatosVista()
+    {
+        return $this->asJson([
+            'carrito' => $this->renderAjax('_carrito',
+                $this->datosVista()
+            ),
+            'cantidad' => Usuarios::cantidadEnCarrito(),
+        ]);
+    }
+
+    private function borrarCarritoUsuario()
+    {
+        (new Query())->createCommand()
+            ->delete('carritos', [
+                'usuario_id' => Yii::$app->user->id
+            ])->execute();
     }
 }

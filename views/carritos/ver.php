@@ -1,7 +1,5 @@
 <?php
 
-use yii\bootstrap4\Html;
-
 $this->title = 'Carrito';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -14,8 +12,3 @@ $this->params['breadcrumbs'][] = $this->title;
         'total' => $total,
     ]) ?>
 </div>
-
-<?= Html::a('Vaciar carrito', ['carritos/vaciar'], [
-    'class' => 'btn btn-danger',
-    'data-method' => 'post',
-]);

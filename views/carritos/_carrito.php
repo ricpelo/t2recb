@@ -7,6 +7,7 @@ use yii\helpers\Url;
 
 $urlMas = Url::to(['carritos/mas-ajax']);
 $urlMenos = Url::to(['carritos/menos-ajax']);
+$urlVaciar = Url::to(['carritos/vaciar-ajax']);
 $js = <<<EOT
     function manejador(urlManejador) {
         return function (ev) {
@@ -30,6 +31,7 @@ $js = <<<EOT
 
     $('.boton-mas').click(manejador('$urlMas'));
     $('.boton-menos').click(manejador('$urlMenos'));
+    $('#boton-vaciar').click(manejador('$urlVaciar'));
 EOT;
 $this->registerJs($js);
 ?>
@@ -79,3 +81,9 @@ $this->registerJs($js);
         ],
     ],
 ]) ?>
+
+<?= Html::a('Vaciar carrito', ['carritos/vaciar'], [
+    'class' => 'btn btn-danger',
+    'id' => 'boton-vaciar',
+    'data-method' => 'post',
+]);
