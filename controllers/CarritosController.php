@@ -99,20 +99,6 @@ class CarritosController extends Controller {
         return $this->redirect(['carritos/ver']);
     }
 
-    public function actionMasAjax()
-    {
-        $id = Yii::$app->request->post('id');
-        $carrito = $this->findModel($id);
-        $carrito->cantidad++;
-        $carrito->save();
-        $usuario_id = Yii::$app->user->id;
-        $total = Carritos::total($usuario_id);
-        return $this->asJson([
-            'cantidad' => $carrito->cantidad,
-            'total' => Yii::$app->formatter->asCurrency($total),
-        ]);
-    }
-
     public function actionMenos($id)
     {
         $carrito = $this->findModel($id);
@@ -125,6 +111,47 @@ class CarritosController extends Controller {
         }
 
         return $this->redirect(['carritos/ver']);
+    }
+
+    public function actionMasAjax()
+    {
+        $id = Yii::$app->request->post('id');
+        $carrito = $this->findModel($id);
+        $carrito->cantidad++;
+        $carrito->save();
+        $usuario_id = Yii::$app->user->id;
+        $total = Carritos::total($usuario_id);
+        $importe = $carrito->cantidad * $carrito->zapato->precio;
+        return $this->asJson([
+            'cantidad' => $carrito->cantidad,
+            'importe' => Yii::$app->formatter->asCurrency($importe),
+            'total' => Yii::$app->formatter->asCurrency($total),
+        ]);
+    }
+
+    public function actionMenosAjax()
+    {
+        $id = Yii::$app->request->post('id');
+        $carrito = $this->findModel($id);
+        $usuario_id = Yii::$app->user->id;
+        $total = Carritos::total($usuario_id);
+
+        if ($carrito->cantidad <= 1) {
+            $carrito->delete();
+            $cantidad = 0;
+            $importe = 0;
+        } else {
+            $carrito->cantidad--;
+            $carrito->save();
+            $cantidad = $carrito->cantidad;
+            $importe = $cantidad * $carrito->zapato->precio;
+        }
+
+        return $this->asJson([
+            'cantidad' => $cantidad,
+            'importe' => Yii::$app->formatter->asCurrency($importe),
+            'total' => Yii::$app->formatter->asCurrency($total),
+        ]);
     }
 
     protected static function findModel($id)

@@ -9,14 +9,15 @@ use yii\helpers\Url;
 $this->title = 'Carrito';
 $this->params['breadcrumbs'][] = $this->title;
 
-$url = Url::to(['carritos/mas-ajax']);
+$urlMas = Url::to(['carritos/mas-ajax']);
+$urlMenos = Url::to(['carritos/menos-ajax']);
 $js = <<<EOT
     $('.boton-mas').click(function (ev) {
         var padre = $(this).closest('tr');
         var id = padre.data('key');
         ev.preventDefault();
         $.ajax({
-            url: '$url',
+            url: '$urlMas',
             type: 'post',
             data: {
                 id: id
@@ -24,6 +25,32 @@ $js = <<<EOT
         })
         .done(function (data) {
             $(padre).children('td').eq(3).text(data.cantidad);
+            $(padre).children('td').eq(4).text(data.importe);
+            $('#total').text(data.total);
+
+        });
+        return false;
+    });
+
+    $('.boton-menos').click(function (ev) {
+        var padre = $(this).closest('tr');
+        var id = padre.data('key');
+        ev.preventDefault();
+        $.ajax({
+            url: '$urlMenos',
+            type: 'post',
+            data: {
+                id: id
+            }
+        })
+        .done(function (data) {
+            if (data.cantidad > 0) {
+                $(padre).children('td').eq(3).text(data.cantidad);
+                $(padre).children('td').eq(4).text(data.importe);
+            } else {
+                $(padre).remove();
+            }
+            $('#total').text(data.total);
         });
         return false;
     });
@@ -50,7 +77,9 @@ $this->registerJs($js);
                 return $model->cantidad * $model->zapato->precio;
             },
             'format' => 'currency',
-            'footer' => Yii::$app->formatter->asCurrency($total),
+            'footer' => '<span id="total">' .
+                        Yii::$app->formatter->asCurrency($total) .
+                        '</span>',
         ],
         [
             'class' => ActionColumn::class,
