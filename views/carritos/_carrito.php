@@ -8,41 +8,28 @@ use yii\helpers\Url;
 $urlMas = Url::to(['carritos/mas-ajax']);
 $urlMenos = Url::to(['carritos/menos-ajax']);
 $js = <<<EOT
-    $('.boton-mas').click(function (ev) {
-        var padre = $(this).closest('tr');
-        var id = padre.data('key');
-        ev.preventDefault();
-        $.ajax({
-            url: '$urlMas',
-            type: 'post',
-            data: {
-                id: id
-            }
-        })
-        .done(function (data) {
-            $('#carrito').html(data.carrito);
-            $('#ver-carrito').html(data.cantidad);
-        });
-        return false;
-    });
+    function manejador(urlManejador) {
+        return function (ev) {
+            var padre = $(this).closest('tr');
+            var id = padre.data('key');
+            ev.preventDefault();
+            $.ajax({
+                url: urlManejador,
+                type: 'post',
+                data: {
+                    id: id
+                }
+            })
+            .done(function (data) {
+                $('#carrito').html(data.carrito);
+                $('#ver-carrito').html(data.cantidad);
+            });
+            return false;
+        }
+    }
 
-    $('.boton-menos').click(function (ev) {
-        var padre = $(this).closest('tr');
-        var id = padre.data('key');
-        ev.preventDefault();
-        $.ajax({
-            url: '$urlMenos',
-            type: 'post',
-            data: {
-                id: id
-            }
-        })
-        .done(function (data) {
-            $('#carrito').html(data.carrito);
-            $('#ver-carrito').html(data.cantidad);
-        });
-        return false;
-    });
+    $('.boton-mas').click(manejador('$urlMas'));
+    $('.boton-menos').click(manejador('$urlMenos'));
 EOT;
 $this->registerJs($js);
 ?>

@@ -42,22 +42,7 @@ class CarritosController extends Controller {
 
     public function actionVer()
     {
-        $usuario_id = Yii::$app->user->id;
-        $total = Carritos::total($usuario_id);
-        $query = Carritos::find()
-            ->where([
-                'usuario_id' => $usuario_id,
-            ])
-            ->orderBy('id');
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
-
-        return $this->render('ver', [
-            'dataProvider' => $dataProvider,
-            'total' => $total,
-        ]);
+        return $this->render('ver', $this->datosVista());
     }
 
     public function actionMeter($id)
@@ -94,82 +79,38 @@ class CarritosController extends Controller {
 
     public function actionMas($id)
     {
-        $carrito = $this->findModel($id);
-        $carrito->cantidad++;
-        $carrito->save();
-        return $this->redirect(['carritos/ver']);
-    }
-
-    public function actionMenos($id)
-    {
-        $carrito = $this->findModel($id);
-
-        if ($carrito->cantidad <= 1) {
-            $carrito->delete();
-        } else {
-            $carrito->cantidad--;
-            $carrito->save();
-        }
-
+        $this->masZapato($id);
         return $this->redirect(['carritos/ver']);
     }
 
     public function actionMasAjax()
     {
         $id = Yii::$app->request->post('id');
-        $carrito = $this->findModel($id);
-        $carrito->cantidad++;
-        $carrito->save();
-        $usuario_id = Yii::$app->user->id;
-        $total = Carritos::total($usuario_id);
-        $query = Carritos::find()
-            ->where([
-                'usuario_id' => $usuario_id,
-            ])
-            ->orderBy('id');
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+        $this->masZapato($id);
 
         return $this->asJson([
-            'carrito' => $this->renderAjax('_carrito', [
-                'dataProvider' => $dataProvider,
-                'total' => $total,
-            ]),
+            'carrito' => $this->renderAjax('_carrito',
+                $this->datosVista()
+            ),
             'cantidad' => Usuarios::cantidadEnCarrito(),
         ]);
+    }
+
+    public function actionMenos($id)
+    {
+        $this->menosZapato($id);
+        return $this->redirect(['carritos/ver']);
     }
 
     public function actionMenosAjax()
     {
         $id = Yii::$app->request->post('id');
-        $carrito = $this->findModel($id);
-        $usuario_id = Yii::$app->user->id;
-
-        if ($carrito->cantidad <= 1) {
-            $carrito->delete();
-        } else {
-            $carrito->cantidad--;
-            $carrito->save();
-        }
-
-        $total = Carritos::total($usuario_id);
-        $query = Carritos::find()
-            ->where([
-                'usuario_id' => $usuario_id,
-            ])
-            ->orderBy('id');
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+        $this->menosZapato($id);
 
         return $this->asJson([
-            'carrito' => $this->renderAjax('_carrito', [
-                'dataProvider' => $dataProvider,
-                'total' => $total,
-            ]),
+            'carrito' => $this->renderAjax('_carrito',
+                $this->datosVista()
+            ),
             'cantidad' => Usuarios::cantidadEnCarrito(),
         ]);
     }
@@ -181,5 +122,42 @@ class CarritosController extends Controller {
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    private function datosVista()
+    {
+        $usuario_id = Yii::$app->user->id;
+        $total = Carritos::total($usuario_id);
+        $query = Carritos::find()
+            ->where([
+                'usuario_id' => $usuario_id,
+            ])
+            ->orderBy('id');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        return [
+            'dataProvider' => $dataProvider,
+            'total' => $total,
+        ];
+    }
+
+    private function masZapato($id) {
+        $carrito = $this->findModel($id);
+        $carrito->cantidad++;
+        $carrito->save();
+    }
+
+    private function menosZapato($id) {
+        $carrito = $this->findModel($id);
+
+        if ($carrito->cantidad <= 1) {
+            $carrito->delete();
+        } else {
+            $carrito->cantidad--;
+            $carrito->save();
+        }
     }
 }
