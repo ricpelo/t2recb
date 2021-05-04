@@ -3,17 +3,16 @@
 namespace app\controllers;
 
 use app\models\Carritos;
+use app\models\Facturas;
 use app\models\Usuarios;
 use app\models\Zapatos;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Query;
-use yii\db\QueryBuilder;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\web\Response;
 
 class CarritosController extends Controller {
     public function behaviors()
@@ -26,6 +25,7 @@ class CarritosController extends Controller {
                     'vaciar' => ['POST'],
                     'mas' => ['POST'],
                     'menos' => ['POST'],
+                    'crearFactura' => ['POST'],
                 ],
             ],
             'access' => [
@@ -69,13 +69,13 @@ class CarritosController extends Controller {
 
     public function actionVaciar()
     {
-        static::borrarCarritoUsuario();
+        $this->borrarCarritoUsuario();
         return $this->redirect(['carritos/ver']);
     }
 
     public function actionVaciarAjax()
     {
-        static::borrarCarritoUsuario();
+        $this->borrarCarritoUsuario();
         return $this->devolverDatosVista();
     }
 
@@ -103,6 +103,25 @@ class CarritosController extends Controller {
         $id = Yii::$app->request->post('id');
         $this->menosZapato($id);
         return $this->devolverDatosVista();
+    }
+
+    public function actionCrearFactura()
+    {
+        $usuario_id = Yii::$app->user->id;
+        $factura = new Facturas([
+            'usuario_id' => $usuario_id,
+        ]);
+        $factura->save();
+        $sql = 'INSERT INTO lineas (factura_id, zapato_id, cantidad)
+                SELECT :factura_id, zapato_id, cantidad
+                  FROM carritos
+                 WHERE usuario_id = :usuario_id';
+        Yii::$app->db->createCommand($sql, [
+            ':factura_id' => $factura->id,
+            ':usuario_id' => $usuario_id,
+        ])->execute();
+        $this->borrarCarritoUsuario();
+        return $this->redirect(['zapatos/index']);
     }
 
     protected static function findModel($id)
@@ -161,7 +180,7 @@ class CarritosController extends Controller {
         ]);
     }
 
-    public static function borrarCarritoUsuario()
+    public function borrarCarritoUsuario()
     {
         (new Query())->createCommand()
             ->delete('carritos', [

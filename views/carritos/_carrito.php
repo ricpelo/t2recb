@@ -82,7 +82,7 @@ $this->registerJs($js);
     ],
 ]) ?>
 
-<?= Html::a('Realizar pedido', ['facturas/crear'], [
+<?= Html::a('Realizar pedido', ['carritos/crear-factura'], [
     'class' => 'btn btn-success',
     'data-method' => 'post',
 ]) ?>
