@@ -47,6 +47,8 @@ class CarritosController extends Controller {
 
     public function actionMeter($id)
     {
+        Yii::$app->user->setReturnUrl(['carritos/meter', 'id' => $id]);
+
         $zapato = Zapatos::findModel($id);
         $carrito = Carritos::findOne([
             'usuario_id' => Yii::$app->user->id,
@@ -65,6 +67,31 @@ class CarritosController extends Controller {
 
         $carrito->save();
         return $this->redirect(['zapatos/index']);
+    }
+
+    public function actionMeterAjax()
+    {
+        $id = Yii::$app->request->post('id');
+        $zapato = Zapatos::findModel($id);
+        $carrito = Carritos::findOne([
+            'usuario_id' => Yii::$app->user->id,
+            'zapato_id' => $zapato->id,
+        ]);
+
+        if ($carrito !== null) {
+            $carrito->cantidad++;
+        } else {
+            $carrito = new Carritos([
+                'usuario_id' => Yii::$app->user->id,
+                'zapato_id' => $zapato->id,
+                'cantidad' => 1,
+            ]);
+        }
+
+        $carrito->save();
+        return $this->asJson([
+            'cantidad' => Usuarios::cantidadEnCarrito(),
+        ]);
     }
 
     public function actionVaciar()

@@ -3,6 +3,7 @@
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
+use yii\web\UrlRule;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ZapatosSearch */
@@ -10,6 +11,29 @@ use yii\helpers\Url;
 
 $this->title = 'Zapatos';
 $this->params['breadcrumbs'][] = $this->title;
+
+$url = Url::to(['carritos/meter-ajax']);
+$js = <<<EOT
+    $('.boton-anyadir').click(function (ev) {
+        ev.preventDefault();
+        var padre = $(this).closest('tr');
+        var id = padre.data('key');
+        $.ajax({
+            url: '$url',
+            type: 'post',
+            data: {
+                id: id
+            }
+        })
+        .done(function (data) {
+            $('#ver-carrito').html(data.cantidad);
+        });
+        return false;
+    });
+EOT;
+if (!Yii::$app->user->isGuest) {
+    $this->registerJs($js);
+}
 ?>
 <div class="zapatos-index">
 
@@ -38,7 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'carritos/meter',
                             'id' => $key,
                         ], [
-                            'class' => 'btn-sm btn-info',
+                            'class' => 'btn-sm btn-info boton-anyadir',
                             'data-method' => 'post',
                         ]);
                     },
